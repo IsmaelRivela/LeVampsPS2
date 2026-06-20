@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeVamps Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ratio-w: 16;
+      --ratio-h: 9;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #0a0a0a;
+      overflow: hidden;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    .desktop {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(0px, 2vh, 24px);
+    }
+
+    .app-window {
+      width: min(100vw, calc(100vh * var(--ratio-w) / var(--ratio-h)));
+      height: min(100vh, calc(100vw * var(--ratio-h) / var(--ratio-w)));
+      max-width: 1280px;
+      display: flex;
+      flex-direction: column;
+      background: #000;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .app-titlebar {
+      flex-shrink: 0;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px 0 14px;
+      background: linear-gradient(180deg, #1a1a1f 0%, #101014 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      user-select: none;
+    }
+
+    .app-traffic {
+      display: flex;
+      gap: 7px;
+    }
+
+    .app-traffic i {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: block;
+      background: #3a3a42;
+    }
+
+    .app-traffic i:nth-child(1) { background: #ff5f57; }
+    .app-traffic i:nth-child(2) { background: #febc2e; }
+    .app-traffic i:nth-child(3) { background: #28c840; }
+
+    .app-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: rgba(255, 255, 255, 0.45);
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .app-stage {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+      background: #000;
+    }
+
+    .boot-screen {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      z-index: 3;
+      opacity: 1;
+      transition: opacity 0.55s ease;
+    }
+
+    .boot-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .boot-label {
+      position: absolute;
+      right: 5%;
+      bottom: 6%;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(13px, 1.6vw, 17px);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #d8d8d8;
+    }
+
+    .boot-dots {
+      display: inline-block;
+      min-width: 1.35em;
+      text-align: left;
+    }
+
+    .app-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000;
+      opacity: 0;
+      transition: opacity 0.55s ease;
+    }
+
+    .app-frame.ready {
+      opacity: 1;
+    }
+
+    .boot-fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      text-align: center;
+      background: #000;
+      z-index: 4;
+    }
+
+    .boot-fallback.visible {
+      display: flex;
+    }
+
+    .boot-fallback p {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 13px;
+      line-height: 1.7;
+      max-width: 28em;
+    }
+
+    .boot-fallback a,
+    .boot-fallback button {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #aac0ff;
+      background: none;
+      border: 1px solid rgba(170, 192, 255, 0.35);
+      padding: 10px 18px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .boot-fallback button:hover,
+    .boot-fallback a:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.45);
+    }
+
+    .crt-global {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0, 0, 0, 0.06) 3px,
+        rgba(0, 0, 0, 0.06) 4px
+      );
+      box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.35);
+    }
+
+    .crt-global::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop">
+    <div class="app-window" role="application" aria-label="LeVamps Portfolio">
+      <header class="app-titlebar">
+        <div class="app-traffic" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </div>
+        <span class="app-title">LeVamps Portfolio</span>
+      </header>
+
+      <div class="app-stage">
+        <div class="boot-screen" id="bootScreen">
+          <p class="boot-label">
+            loading <span id="bootText">portfolio</span><span id="bootDots" class="boot-dots"></span>
+          </p>
+        </div>
+
+        <iframe
+          id="appFrame"
+          class="app-frame"
+          title="LeVamps Portfolio"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
+        ></iframe>
+
+        <div class="boot-fallback" id="bootFallback">
+          <p>No se pudo cargar dentro de la app. Abre la experiencia completa en el navegador.</p>
+          <a id="openExternal" href="#" target="_blank" rel="noopener">Abrir portfolio</a>
+          <button type="button" id="retryLoad">Reintentar</button>
+        </div>
+
+        <div class="crt-global" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // GitHub Pages — IsmaelRivDev/LeVampsPS2
+    const PAGES_URL = 'https://ismaelrivdev.github.io/LeVampsPS2/';
+
+    const BOOT_PHASES = ['portfolio', 'levamps'];
+    const BOOT_CYCLES = 2;
+    const DOT_STEP_MS = 320;
+
+    const bootScreen = document.getElementById('bootScreen');
+    const bootText = document.getElementById('bootText');
+    const bootDots = document.getElementById('bootDots');
+    const appFrame = document.getElementById('appFrame');
+    const bootFallback = document.getElementById('bootFallback');
+    const openExternal = document.getElementById('openExternal');
+    const retryLoad = document.getElementById('retryLoad');
+
+    openExternal.href = PAGES_URL;
+
+    let dotsInterval = 0;
+    let bootDone = false;
+    let frameLoaded = false;
+
+    function clearBootDots() {
+      clearInterval(dotsInterval);
+      dotsInterval = 0;
+    }
+
+    function runBootSequence() {
+      return new Promise((resolve) => {
+        let phaseIndex = 0;
+        let dotCount = 0;
+        let cyclesDone = 0;
+
+        function startPhase() {
+          bootText.textContent = BOOT_PHASES[phaseIndex];
+          bootDots.textContent = '';
+          dotCount = 0;
+          cyclesDone = 0;
+        }
+
+        function tick() {
+          dotCount = (dotCount + 1) % 4;
+          bootDots.textContent = '.'.repeat(dotCount);
+
+          if (dotCount === 3) {
+            cyclesDone += 1;
+            if (cyclesDone >= BOOT_CYCLES) {
+              clearBootDots();
+              if (phaseIndex < BOOT_PHASES.length - 1) {
+                phaseIndex += 1;
+                setTimeout(() => {
+                  startPhase();
+                  dotsInterval = setInterval(tick, DOT_STEP_MS);
+                }, DOT_STEP_MS);
+              } else {
+                setTimeout(resolve, DOT_STEP_MS);
+              }
+            }
+          }
+        }
+
+        startPhase();
+        dotsInterval = setInterval(tick, DOT_STEP_MS);
+      });
+    }
+
+    function showExperience() {
+      bootScreen.classList.add('hidden');
+      appFrame.classList.add('ready');
+    }
+
+    function showFallback() {
+      bootScreen.classList.add('hidden');
+      bootFallback.classList.add('visible');
+    }
+
+    function startApp() {
+      bootDone = false;
+      frameLoaded = false;
+      clearBootDots();
+      bootScreen.classList.remove('hidden');
+      bootFallback.classList.remove('visible');
+      appFrame.classList.remove('ready');
+      appFrame.removeAttribute('src');
+
+      appFrame.onload = () => {
+        frameLoaded = true;
+        if (bootDone) showExperience();
+      };
+
+      appFrame.onerror = () => {
+        if (bootDone) showFallback();
+      };
+
+      runBootSequence().then(() => {
+        bootDone = true;
+        appFrame.src = PAGES_URL;
+        if (frameLoaded) showExperience();
+
+        setTimeout(() => {
+          if (!frameLoaded && bootDone) showFallback();
+        }, 12000);
+      });
+    }
+
+    retryLoad.addEventListener('click', startApp);
+    startApp();
+  </script>
+</body>
+</html>

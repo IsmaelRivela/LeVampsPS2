@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>Ismael Rivela — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --white: #ffffff;
+      --dim: rgba(255,255,255,0.55);
+      --glow: 0 0 18px rgba(160,180,255,0.9), 0 0 40px rgba(120,140,255,0.4);
+      --ratio-w: 16;
+      --ratio-h: 9;
+      --ease-snap: cubic-bezier(0.22, 1.85, 0.36, 1);
+    }
+
+    body {
+      background: #000;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Rajdhani', sans-serif;
+      cursor: default;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Viewport fijo 16:9 — escala al redimensionar sin deformar */
+    .experience-viewport {
+      position: relative;
+      width: min(100vw, calc(100vh * var(--ratio-w) / var(--ratio-h)));
+      height: min(100vh, calc(100vw * var(--ratio-h) / var(--ratio-w)));
+      overflow: hidden;
+      background: #000;
+      flex-shrink: 0;
+    }
+
+    /* Vídeo de fondo — cubre el viewport manteniendo ratio */
+    .screen-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      pointer-events: none;
+    }
+
+    /* ─── SCREENS ─────────────────────────────── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.7s ease;
+    }
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ─── GLOBAL CRT ──────────────────────────── */
+    .crt-global {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.06) 3px,
+        rgba(0,0,0,0.06) 4px
+      );
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.35);
+    }
+    .crt-global::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.45) 100%);
+    }
+
+    /* ─── 0. POWER ON PS2 — cursor = vídeo ──── */
+    #poweron {
+      background: #000;
+      cursor: none;
+      --crossfade: 0;
+    }
+
+    #poweron-video {
+      position: absolute;
+      width: 12vw;
+      min-width: 72px;
+      max-width: 180px;
+      height: auto;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      object-fit: contain;
+      z-index: 3;
+      left: 50%;
+      top: 50%;
+      opacity: calc(1 - var(--crossfade));
+    }
+
+    .poweron-trail {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .poweron-trail-ghost {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(13px, 1.65vw, 19px);
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #fff;
+      white-space: nowrap;
+      pointer-events: none;
+      text-shadow:
+        0 0 2px #000,
+        0 1px 4px rgba(0, 0, 0, 0.95),
+        0 0 18px rgba(255, 255, 255, 0.65);
+      animation: poweronTrailFade 2.4s ease-out forwards;
+    }
+
+    @keyframes poweronTrailFade {
+      0%, 45% {
+        opacity: 1;
+        filter: blur(0);
+      }
+      100% {
+        opacity: 0;
+        filter: blur(5px);
+      }
+    }
+
+    .poweron-boot-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      opacity: var(--crossfade);
+      pointer-events: none;
+      background: #000;
+    }
+
+    .poweron-boot-bg video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .poweron-flash {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      z-index: 5;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .poweron-flash.active {
+      opacity: 1;
+    }
+
+    .screen.instant {
+      transition: opacity 0s !important;
+    }
+
+    /* ─── 1. BOOT / INTRO VIDEO ──────────────── */
+    #boot { background: #000; }
+
+    .boot-video-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #boot-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      background: #000;
+    }
+
+    .boot-gate {
+      display: none;
+    }
+
+    .boot-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+      z-index: 2;
+    }
+
+    .skip-hint {
+      position: absolute;
+      bottom: 4%;
+      right: 4%;
+      color: rgba(255,255,255,0.25);
+      font-size: clamp(9px, 1.1vw, 11px);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.3s, opacity 0.3s;
+      z-index: 3;
+      opacity: 0;
+      pointer-events: none;
+      animation: pulseHint 2.4s ease-in-out infinite;
+    }
+    #boot.is-playing .skip-hint {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .skip-hint:hover { color: rgba(255,255,255,0.7); }
+
+    @keyframes pulseHint {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* ─── 2. TITLE SCREEN ────────────────────── */
+    #title {
+      background: #000;
+    }
+
+    .title-prompt {
+      position: absolute;
+      bottom: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(10px, 1.2vw, 12px);
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      animation: blink 1.6s step-end infinite;
+      z-index: 2;
+      text-shadow: 0 0 16px rgba(0,0,0,1), 0 2px 8px rgba(0,0,0,0.9);
+      white-space: nowrap;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* ─── 3. MENU ────────────────────────────── */
+    #menu { background: #000; }
+
+    .menu-options {
+      position: absolute;
+      bottom: 6%;
+      left: 5%;
+      z-index: 10;
+    }
+
+    /* Botón Start — canvas con alpha (sin recuadro negro) */
+    .menu-opt {
+      background: none;
+      border: none;
+      outline: none;
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      display: block;
+      -webkit-tap-highlight-color: transparent;
+      overflow: visible;
+    }
+
+    .opt-media-wrap {
+      display: block;
+      position: relative;
+      background: transparent;
+      transform: scale(1) translateY(0) skewX(0deg);
+      transform-origin: left bottom;
+      will-change: transform, filter;
+      filter: brightness(1) drop-shadow(0 0 0 rgba(255,255,255,0));
+    }
+
+    /* FIFA Street / PS2 menu — un solo bote */
+    @keyframes fsPopIn {
+      0%   { transform: scale(1) translateY(0) skewX(0deg); filter: brightness(1) drop-shadow(0 0 0 rgba(255,255,255,0)); }
+      45%  { transform: scale(1.38) translateY(-9px) skewX(-1.5deg); filter: brightness(1.3) drop-shadow(0 0 16px rgba(200,220,255,0.45)); }
+      100% { transform: scale(1.22) translateY(-3px) skewX(0deg); filter: brightness(1.15) drop-shadow(0 0 10px rgba(185,205,255,0.32)); }
+    }
+
+    @keyframes fsPopOut {
+      0%   { transform: scale(1.22) translateY(-3px) skewX(0deg); filter: brightness(1.15); }
+      40%  { transform: scale(0.94) translateY(2px) skewX(0.8deg); filter: brightness(0.92); }
+      100% { transform: scale(1) translateY(0) skewX(0deg); filter: brightness(1); }
+    }
+
+    @keyframes fsSwapToHover {
+      0%, 11% { opacity: 0; }
+      12%, 100% { opacity: 1; }
+    }
+
+    @keyframes fsSwapToDefault {
+      0%, 11% { opacity: 1; }
+      12%, 100% { opacity: 0; }
+    }
+
+    @keyframes fsSwapRevToHover {
+      0%, 9% { opacity: 1; }
+      10%, 100% { opacity: 0; }
+    }
+
+    @keyframes fsSwapRevToDefault {
+      0%, 9% { opacity: 0; }
+      10%, 100% { opacity: 1; }
+    }
+
+    .menu-opt.anim-in .opt-media-wrap {
+      animation: fsPopIn 0.38s cubic-bezier(0.34, 1.25, 0.64, 1) forwards;
+    }
+
+    .menu-opt.anim-out .opt-media-wrap {
+      animation: fsPopOut 0.32s cubic-bezier(0.55, 0.08, 0.68, 0.9) forwards;
+    }
+
+    .opt-canvas {
+      display: block;
+      width: clamp(240px, 37.5vw, 490px);
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .opt-canvas.default { opacity: 1; }
+
+    .opt-canvas.hover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      opacity: 0;
+    }
+
+    .menu-opt.anim-in .opt-canvas.default {
+      animation: fsSwapToDefault 0.38s steps(1) forwards;
+    }
+    .menu-opt.anim-in .opt-canvas.hover {
+      animation: fsSwapToHover 0.38s steps(1) forwards;
+    }
+    .menu-opt.anim-out .opt-canvas.default {
+      animation: fsSwapRevToDefault 0.32s steps(1) forwards;
+    }
+    .menu-opt.anim-out .opt-canvas.hover {
+      animation: fsSwapRevToHover 0.32s steps(1) forwards;
+    }
+
+    .opt-src {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    /* ─── 3. PS1 LOADING ─────────────────────── */
+    #ps1load {
+      background: #000;
+    }
+
+    .ps1-load-label {
+      position: absolute;
+      right: 5%;
+      bottom: 6%;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(13px, 1.6vw, 17px);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #d8d8d8;
+    }
+
+    .ps1-load-dots {
+      display: inline-block;
+      min-width: 1.35em;
+      text-align: left;
+    }
+
+    /* ─── 4. PORTFOLIO (IFRAME) ──────────────── */
+    #portfolio {
+      background: #030308;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .portfolio-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: rgba(0,0,8,0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      z-index: 10;
+    }
+
+    .portfolio-back {
+      color: #555;
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.25s;
+      background: none;
+      border: none;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .portfolio-back:hover { color: #aac0ff; }
+
+    .portfolio-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 6px;
+      color: #333;
+      text-transform: uppercase;
+    }
+
+    .portfolio-frame-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    #portfolio-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }
+
+    .portfolio-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: #030308;
+      z-index: 5;
+      transition: opacity 0.4s;
+    }
+    .portfolio-loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-text {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: #444;
+      text-transform: uppercase;
+    }
+
+    .loading-bar {
+      width: 200px;
+      height: 2px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      width: 30%;
+      background: linear-gradient(90deg, transparent, #7090cc, transparent);
+      animation: loadSlide 1.2s ease-in-out infinite;
+    }
+
+    @keyframes loadSlide {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+
+    .portfolio-fallback {
+      display: none;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      background: #030308;
+      z-index: 6;
+      text-align: center;
+      padding: 40px;
+    }
+    .portfolio-fallback.visible { display: flex; }
+
+    .fallback-msg {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      letter-spacing: 5px;
+      color: #555;
+      text-transform: uppercase;
+    }
+
+    .fallback-link {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      letter-spacing: 4px;
+      color: #7090cc;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid rgba(112,144,204,0.3);
+      padding: 12px 28px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .fallback-link:hover {
+      color: #aac0ff;
+      border-color: rgba(170,192,255,0.5);
+    }
+
+    /* ─── 5. ABOUT ───────────────────────────── */
+    #about {
+      background: #030308;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .about-back {
+      position: absolute;
+      top: 4%;
+      left: 4%;
+      color: #444;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.25s;
+      z-index: 10;
+      background: none;
+      border: none;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .about-back:hover { color: #aaa; }
+
+    .about-content {
+      display: flex;
+      gap: clamp(24px, 5vw, 64px);
+      max-width: 90%;
+      width: 90%;
+      align-items: center;
+      overflow-y: auto;
+      max-height: 85%;
+    }
+
+    @media (max-aspect-ratio: 16/10) {
+      .about-content {
+        flex-direction: column;
+        gap: 24px;
+        padding-top: 48px;
+      }
+    }
+
+    .about-photo-placeholder {
+      width: clamp(160px, 22vw, 270px);
+      min-width: clamp(160px, 22vw, 270px);
+      height: clamp(220px, 30vw, 370px);
+      background: #0a0a14;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #2a2a3a;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .about-photo-placeholder svg { opacity: 0.15; }
+
+    .about-text-wrap { flex: 1; min-width: 0; }
+
+    .about-name-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(14px, 1.6vw, 18px);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .about-body {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 300;
+      font-size: clamp(13px, 1.4vw, 16px);
+      line-height: 1.85;
+      color: rgba(255,255,255,0.65);
+      text-align: justify;
+      letter-spacing: 0.4px;
+    }
+    .about-body p + p { margin-top: 14px; }
+
+    .about-tech {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tech-tag {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(170,192,255,0.7);
+      border: 1px solid rgba(170,192,255,0.15);
+      padding: 4px 10px;
+    }
+
+    .about-contact {
+      margin-top: 24px;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #444;
+    }
+    .about-contact a {
+      color: #7090cc;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .about-contact a:hover { color: #aac0ff; }
+  </style>
+</head>
+<body>
+
+<div class="experience-viewport">
+
+  <div class="crt-global" aria-hidden="true"></div>
+
+  <!-- POWER ON — cursor = vídeo PS2 apagado -->
+  <div id="poweron" class="screen active">
+    <div class="poweron-boot-bg" id="poweronBootBg">
+      <video
+        id="poweron-boot-video"
+        src="assets/ps2intro.mp4?v=5"
+        playsinline
+        preload="auto"
+      ></video>
+    </div>
+    <div class="poweron-trail" id="poweronTrail" aria-hidden="true"></div>
+    <video
+      id="poweron-video"
+      src="assets/ps2-turn-on-effectapp.mp4?v=7"
+      playsinline
+      preload="auto"
+      muted
+    ></video>
+  </div>
+
+  <!-- BOOT — PS2 intro local -->
+  <div id="boot" class="screen">
+    <div class="boot-video-wrap">
+      <video
+        id="boot-video"
+        src="assets/ps2intro.mp4?v=5"
+        playsinline
+        preload="auto"
+      ></video>
+    </div>
+    <div class="boot-vignette"></div>
+    <div class="skip-hint" id="skipHint">Skip — press any key</div>
+  </div>
+
+  <!-- TITLE SCREEN — intro.mp4 -->
+  <div id="title" class="screen">
+    <video
+      id="title-video"
+      class="screen-video"
+      src="intro.mp4?v=4"
+      muted
+      loop
+      playsinline
+      preload="auto"
+    ></video>
+    <audio id="title-music" src="assets/title-theme.mp3" loop preload="auto"></audio>
+    <audio id="title-start-sound" src="assets/startsound.mp3" preload="auto"></audio>
+    <div class="title-prompt">Press Enter to continue</div>
+  </div>
+
+  <!-- MAIN MENU — pantalla2.mp4 -->
+  <div id="menu" class="screen">
+    <video
+      id="menu-video"
+      class="screen-video"
+      src="pantalla2.mp4?v=4"
+      muted
+      loop
+      playsinline
+      preload="auto"
+    ></video>
+    <nav class="menu-options" id="menuNav">
+      <button class="menu-opt media-opt" data-action="portfolio" aria-label="Start">
+        <div class="opt-media-wrap">
+          <canvas class="opt-canvas default" aria-hidden="true"></canvas>
+          <canvas class="opt-canvas hover" aria-hidden="true"></canvas>
+          <video class="opt-src default" src="assets/menu/start-default.mp4?v=4" muted loop playsinline preload="auto"></video>
+          <video class="opt-src hover" src="assets/menu/start-hover.mp4?v=4" muted loop playsinline preload="auto"></video>
+        </div>
+      </button>
+    </nav>
+  </div>
+
+  <!-- PS1 LOADING -->
+  <div id="ps1load" class="screen">
+    <p class="ps1-load-label">loading <span id="ps1LoadText">portfolio</span><span id="ps1LoadDots" class="ps1-load-dots"></span></p>
+  </div>
+
+  <!-- PORTFOLIO EMBED -->
+  <div id="portfolio" class="screen">
+    <header class="portfolio-bar">
+      <button class="portfolio-back" data-action="menu">◀ Main Menu</button>
+      <span class="portfolio-label">Portfolio Terminal</span>
+    </header>
+    <div class="portfolio-frame-wrap">
+      <div class="portfolio-loading" id="portfolioLoading">
+        <div class="loading-text">Loading signal</div>
+        <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+      </div>
+      <div class="portfolio-fallback" id="portfolioFallback">
+        <p class="fallback-msg">Signal lost — unable to embed</p>
+        <a class="fallback-link" href="https://levamps.com" target="_blank" rel="noopener">Open external terminal ↗</a>
+      </div>
+      <iframe
+        id="portfolio-frame"
+        title="Portfolio — levamps.com"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div id="about" class="screen">
+    <button class="about-back" data-action="menu">← Back</button>
+    <div class="about-content">
+      <div class="about-photo-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
+          <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+        </svg>
+        <span>Tu foto aquí</span>
+      </div>
+      <div class="about-text-wrap">
+        <div class="about-name-title">Ismael Rivela</div>
+        <div class="about-body">
+          <p>
+            Diseñador y desarrollador creativo con pasión por construir experiencias
+            digitales que conectan con las personas. Mi trabajo combina visión
+            estética con precisión técnica, explorando los límites entre el diseño
+            gráfico, el motion y la programación.
+          </p>
+          <p>
+            Creo en proyectos con carácter, donde cada detalle comunica algo.
+            Trabajo tanto en identidad visual como en desarrollo web, siempre con
+            un enfoque personal e irreductible.
+          </p>
+          <p>Si quieres colaborar, hablemos.</p>
+        </div>
+        <div class="about-tech">
+          <span class="tech-tag">HTML / CSS / JS</span>
+          <span class="tech-tag">React</span>
+          <span class="tech-tag">Design</span>
+          <span class="tech-tag">Motion</span>
+          <span class="tech-tag">Branding</span>
+        </div>
+        <div class="about-contact">
+          Contact — <a href="https://levamps.com" target="_blank" rel="noopener">levamps.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.experience-viewport -->
+
+<script>
+const PORTFOLIO_URL = 'https://levamps.com';
+const ASSET_V = '5';
+
+let currentScreen = 'poweron';
+let portfolioLoaded = false;
+let ps1Loading = false;
+let ps1LoadTimer = 0;
+let ps1DotsInterval = 0;
+const PS1_LOAD_PHASES = ['portfolio', 'levamps'];
+const PS1_LOAD_CYCLES = 2;
+const PS1_DOT_STEP_MS = 320;
+let menuIndex = 0;
+let menuLumaReady = false;
+let audioUnlocked = false;
+let poweronStarted = false;
+let bootCrossfadeStarted = false;
+let poweronHandoffDone = false;
+let crossfadeRaf = 0;
+let bootStarted = false;
+let bootFinished = false;
+
+const poweronScreen = document.getElementById('poweron');
+const poweronVideo = document.getElementById('poweron-video');
+const poweronBootBg = document.getElementById('poweronBootBg');
+const poweronBootVideo = document.getElementById('poweron-boot-video');
+const poweronTrail = document.getElementById('poweronTrail');
+const bootVideo = document.getElementById('boot-video');
+const bootScreen = document.getElementById('boot');
+const titleVideo = document.getElementById('title-video');
+const titleMusic = document.getElementById('title-music');
+const titleStartSound = document.getElementById('title-start-sound');
+const menuVideo = document.getElementById('menu-video');
+
+/* ─── LUMA KEY (quita fondo negro del vídeo) ─ */
+class LumaKeyPlayer {
+  constructor(canvas, video, threshold = 32, soft = 22) {
+    this.canvas = canvas;
+    this.video = video;
+    this.ctx = canvas.getContext('2d', { alpha: true });
+    this.threshold = threshold;
+    this.soft = soft;
+    this.running = false;
+    this.raf = 0;
+  }
+
+  start() {
+    if (this.running) return;
+    this.running = true;
+    this.video.play().catch(() => {});
+    this.tick();
+  }
+
+  stop() {
+    this.running = false;
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.video.pause();
+  }
+
+  tick = () => {
+    if (!this.running) return;
+    this.draw();
+    this.raf = requestAnimationFrame(this.tick);
+  };
+
+  draw() {
+    const { video, canvas, ctx, threshold, soft } = this;
+    if (video.readyState < 2) return;
+
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+    if (!w || !h) return;
+
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(video, 0, 0, w, h);
+
+    const frame = ctx.getImageData(0, 0, w, h);
+    const px = frame.data;
+    const hi = threshold + soft;
+
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i];
+      const g = px[i + 1];
+      const b = px[i + 2];
+      const lum = r * 0.299 + g * 0.587 + b * 0.114;
+
+      if (lum <= threshold) {
+        px[i + 3] = 0;
+      } else if (lum < hi) {
+        px[i + 3] = Math.round(((lum - threshold) / soft) * 255);
+      }
+    }
+
+    ctx.putImageData(frame, 0, 0);
+  }
+}
+
+function initMenuLumaKeys() {
+  if (menuLumaReady) return;
+  menuLumaReady = true;
+
+  menuOpts().forEach(opt => {
+    const defV = opt.querySelector('.opt-src.default');
+    const hovV = opt.querySelector('.opt-src.hover');
+    const defC = opt.querySelector('.opt-canvas.default');
+    const hovC = opt.querySelector('.opt-canvas.hover');
+    if (!defV || !hovV || !defC || !hovC) return;
+
+    opt._lumaDefault = new LumaKeyPlayer(defC, defV);
+    opt._lumaHover = new LumaKeyPlayer(hovC, hovV);
+
+    opt.addEventListener('mouseenter', () => setMenuOptHot(opt, true));
+    opt.addEventListener('mouseleave', () => setMenuOptHot(opt, false));
+    opt.addEventListener('focus', () => setMenuOptHot(opt, true));
+    opt.addEventListener('blur', () => setMenuOptHot(opt, false));
+  });
+}
+
+function startAllMenuLumaPlayers() {
+  menuOpts().forEach(opt => {
+    opt._lumaDefault?.start();
+    opt._lumaHover?.start();
+  });
+}
+
+/* ─── AUDIO ─────────────────────────────────── */
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playBeep(freq = 880, duration = 0.06, vol = 0.08) {
+  try {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (_) {}
+}
+
+function playSelect() { playBeep(660, 0.1, 0.1); }
+function playMove()   { playBeep(440, 0.05, 0.06); }
+
+function playMenuHover() {
+  try {
+    initAudio();
+    const t = audioCtx.currentTime;
+
+    // Tick metálico agudo (cursor MGS)
+    const tick = audioCtx.createOscillator();
+    const tickGain = audioCtx.createGain();
+    tick.type = 'sine';
+    tick.frequency.setValueAtTime(1240, t);
+    tick.frequency.exponentialRampToValueAtTime(720, t + 0.045);
+    tickGain.gain.setValueAtTime(0, t);
+    tickGain.gain.linearRampToValueAtTime(0.065, t + 0.001);
+    tickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
+    tick.connect(tickGain);
+
+    // Cuerpo grave — ping táctico
+    const sub = audioCtx.createOscillator();
+    const subGain = audioCtx.createGain();
+    sub.type = 'triangle';
+    sub.frequency.setValueAtTime(165, t);
+    sub.frequency.exponentialRampToValueAtTime(82, t + 0.07);
+    subGain.gain.setValueAtTime(0, t);
+    subGain.gain.linearRampToValueAtTime(0.045, t + 0.002);
+    subGain.gain.exponentialRampToValueAtTime(0.001, t + 0.065);
+    sub.connect(subGain);
+
+    // Ruido filtrado — textura codec/radio
+    const len = Math.floor(audioCtx.sampleRate * 0.035);
+    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buf;
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 3400;
+    bp.Q.value = 3;
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.028, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+    noise.connect(bp);
+    bp.connect(noiseGain);
+
+    const out = audioCtx.createGain();
+    out.gain.value = 0.9;
+    tickGain.connect(out);
+    subGain.connect(out);
+    noiseGain.connect(out);
+    out.connect(audioCtx.destination);
+
+    tick.start(t); tick.stop(t + 0.06);
+    sub.start(t); sub.stop(t + 0.07);
+    noise.start(t); noise.stop(t + 0.035);
+  } catch (_) {}
+}
+
+function setMenuOptHot(opt, hot) {
+  clearTimeout(opt._animTimer);
+
+  if (hot) {
+    opt.classList.remove('anim-out');
+    void opt.offsetWidth;
+    opt.classList.add('is-hot', 'anim-in');
+    playMenuHover();
+    return;
+  }
+
+  opt.classList.remove('anim-in');
+  void opt.offsetWidth;
+  opt.classList.add('anim-out');
+  opt._animTimer = setTimeout(() => {
+    opt.classList.remove('is-hot', 'anim-out');
+  }, 340);
+}
+
+/* ─── VIDEO CONTROL ───────────────────────── */
+function playScreenVideo(video) {
+  if (!video) return;
+  video.currentTime = 0;
+  video.play().catch(() => {});
+}
+
+function pauseScreenVideo(video) {
+  if (!video) return;
+  video.pause();
+}
+
+function playTitleMusic() {
+  if (!titleMusic) return;
+  unlockAudio();
+  titleMusic.volume = 0.55;
+  titleMusic.currentTime = 0;
+  titleMusic.play().catch(() => {});
+}
+
+function pauseTitleMusic() {
+  if (!titleMusic) return;
+  titleMusic.pause();
+}
+
+function manageVideos(screen) {
+  if (screen === 'title') {
+    playScreenVideo(titleVideo);
+    playTitleMusic();
+  } else {
+    pauseScreenVideo(titleVideo);
+    if (screen !== 'menu') pauseTitleMusic();
+  }
+
+  if (screen === 'menu') {
+    menuVideo.load();
+    playScreenVideo(menuVideo);
+    initMenuLumaKeys();
+    menuOpts().forEach(o => {
+      clearTimeout(o._animTimer);
+      o.classList.remove('is-hot', 'anim-in', 'anim-out');
+    });
+    startAllMenuLumaPlayers();
+  } else {
+    pauseScreenVideo(menuVideo);
+    pauseAllMenuOptionVideos();
+  }
+}
+
+/* ─── MENU OPTION LUMA VIDEOS ─────────────── */
+function pauseAllMenuOptionVideos() {
+  menuOpts().forEach(opt => {
+    opt._lumaDefault?.stop();
+    opt._lumaHover?.stop();
+  });
+}
+
+/* ─── SCREEN MANAGER ──────────────────────── */
+function showScreen(id, instant = false) {
+  if (id === currentScreen) return;
+
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active', 'instant');
+  });
+
+  const target = document.getElementById(id);
+  if (instant) target.classList.add('instant');
+  target.classList.add('active');
+  currentScreen = id;
+
+  manageVideos(id);
+
+  if (id === 'portfolio') loadPortfolio();
+  if (id !== 'poweron') {
+    if (poweronVideo && !poweronVideo.paused) poweronVideo.pause();
+    if (poweronBootVideo && !poweronBootVideo.paused) poweronBootVideo.pause();
+  }
+  if (id !== 'boot' && bootVideo && !bootVideo.paused) {
+    bootVideo.pause();
+  }
+}
+
+function playStartSound() {
+  if (!titleStartSound) return;
+  unlockAudio();
+  titleStartSound.volume = 1;
+  titleStartSound.currentTime = 0;
+  titleStartSound.play().catch(() => {});
+}
+
+function goToMenuFromTitle() {
+  playStartSound();
+  showScreen('menu');
+}
+
+/* ─── POWER ON ────────────────────────────── */
+let lastTrailAt = 0;
+let lastCursorX = null;
+let lastCursorY = null;
+const TRAIL_INTERVAL_MS = 120;
+const TRAIL_LAG_PX = 42;
+const MAX_TRAIL_GHOSTS = 18;
+
+function clearPoweronTrail() {
+  if (poweronTrail) poweronTrail.innerHTML = '';
+  lastCursorX = null;
+  lastCursorY = null;
+}
+
+function spawnPoweronTrail(x, y) {
+  if (poweronStarted || poweronHandoffDone || !poweronTrail) return;
+
+  const now = performance.now();
+  if (now - lastTrailAt < TRAIL_INTERVAL_MS) return;
+  lastTrailAt = now;
+
+  let tx = x;
+  let ty = y;
+
+  if (lastCursorX !== null) {
+    const dx = x - lastCursorX;
+    const dy = y - lastCursorY;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 1) {
+      tx = x - (dx / dist) * TRAIL_LAG_PX;
+      ty = y - (dy / dist) * TRAIL_LAG_PX;
+    }
+  }
+
+  lastCursorX = x;
+  lastCursorY = y;
+
+  const ghost = document.createElement('span');
+  ghost.className = 'poweron-trail-ghost';
+  ghost.textContent = 'click to turn on';
+  ghost.style.left = `${tx}px`;
+  ghost.style.top = `${ty}px`;
+  poweronTrail.appendChild(ghost);
+
+  while (poweronTrail.children.length > MAX_TRAIL_GHOSTS) {
+    poweronTrail.firstChild.remove();
+  }
+
+  ghost.addEventListener('animationend', () => ghost.remove());
+}
+
+function movePoweronCursor(e) {
+  if (poweronHandoffDone) return;
+  const rect = poweronScreen.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  poweronVideo.style.left = `${x}px`;
+  poweronVideo.style.top = `${y}px`;
+  spawnPoweronTrail(x, y);
+}
+
+function setCrossfade(p) {
+  poweronScreen.style.setProperty('--crossfade', Math.max(0, Math.min(1, p)));
+}
+
+function runCrossfade() {
+  const start = performance.now();
+  const remaining = Math.max(0.4, (poweronVideo.duration || 2) - poweronVideo.currentTime);
+  const fadeMs = remaining * 1000 * 0.92;
+
+  function tick(now) {
+    const p = Math.min(1, (now - start) / fadeMs);
+    setCrossfade(p);
+
+    if (p < 1 && !poweronHandoffDone) {
+      crossfadeRaf = requestAnimationFrame(tick);
+    } else {
+      handoffToBootScreen();
+    }
+  }
+
+  cancelAnimationFrame(crossfadeRaf);
+  crossfadeRaf = requestAnimationFrame(tick);
+}
+
+async function beginBootCrossfade() {
+  if (bootCrossfadeStarted) return;
+  bootCrossfadeStarted = true;
+
+  poweronBootVideo.muted = false;
+  poweronBootVideo.volume = 1;
+  poweronBootVideo.currentTime = 0;
+
+  try {
+    await poweronBootVideo.play();
+  } catch (_) {
+    poweronBootVideo.muted = true;
+    await poweronBootVideo.play();
+  }
+
+  runCrossfade();
+}
+
+async function startPowerOn() {
+  if (poweronStarted) return;
+  poweronStarted = true;
+  clearPoweronTrail();
+  audioUnlocked = true;
+  await unlockAudio();
+
+  poweronScreen.classList.add('is-playing');
+
+  poweronVideo.muted = false;
+  poweronVideo.volume = 1;
+  poweronVideo.currentTime = 0;
+
+  try {
+    await poweronVideo.play();
+  } catch (_) {
+    poweronVideo.muted = true;
+    await poweronVideo.play();
+  }
+
+  setTimeout(() => beginBootCrossfade(), 350);
+}
+
+function handoffToBootScreen() {
+  if (poweronHandoffDone) return;
+  poweronHandoffDone = true;
+
+  const t = poweronBootVideo.currentTime || 0;
+
+  bootVideo.muted = poweronBootVideo.muted;
+  bootVideo.volume = poweronBootVideo.volume;
+  bootVideo.currentTime = t;
+
+  showScreen('boot', true);
+  bootVideo.play().catch(() => {});
+  bootStarted = true;
+  bootScreen.classList.add('is-playing');
+
+  poweronVideo.pause();
+  poweronBootVideo.pause();
+  cancelAnimationFrame(crossfadeRaf);
+  clearPoweronTrail();
+  poweronScreen.classList.remove('is-playing');
+  setCrossfade(0);
+  bootCrossfadeStarted = false;
+}
+
+function finishPowerOn() {
+  if (poweronHandoffDone) return;
+  setCrossfade(1);
+  handoffToBootScreen();
+}
+
+function handlePowerOnInput() {
+  if (!poweronStarted) startPowerOn();
+}
+
+poweronScreen.addEventListener('mousemove', movePoweronCursor);
+poweronScreen.addEventListener('click', handlePowerOnInput);
+poweronVideo.addEventListener('loadeddata', () => {
+  poweronVideo.pause();
+  poweronVideo.currentTime = 0;
+}, { once: true });
+
+poweronVideo.addEventListener('ended', finishPowerOn);
+
+/* ─── BOOT PS2 — audio con gesto de usuario ── */
+async function unlockAudio() {
+  initAudio();
+  if (audioCtx && audioCtx.state === 'suspended') {
+    await audioCtx.resume();
+  }
+}
+
+async function tryPlayBootWithSound() {
+  bootVideo.muted = false;
+  bootVideo.volume = 1;
+  bootVideo.currentTime = 0;
+  return bootVideo.play();
+}
+
+async function startBoot() {
+  if (bootStarted || bootFinished) return;
+  bootStarted = true;
+  bootScreen.classList.add('is-playing');
+  await unlockAudio();
+
+  try {
+    await tryPlayBootWithSound();
+  } catch (_) {
+    try {
+      bootVideo.muted = true;
+      await bootVideo.play();
+      bootVideo.pause();
+      bootVideo.currentTime = 0;
+      bootVideo.muted = false;
+      bootVideo.volume = 1;
+      await bootVideo.play();
+    } catch (err) {
+      console.warn('Boot audio blocked:', err);
+      bootVideo.muted = true;
+      await bootVideo.play();
+    }
+  }
+}
+
+function finishBoot() {
+  if (bootFinished) return;
+  bootFinished = true;
+  bootVideo.pause();
+  showScreen('title');
+}
+
+function skipBoot() {
+  if (bootFinished) return;
+  if (!bootStarted) return;
+  finishBoot();
+}
+
+bootVideo.addEventListener('ended', finishBoot);
+document.getElementById('skipHint').addEventListener('click', (e) => {
+  e.stopPropagation();
+  skipBoot();
+});
+
+function openMenuOption(action) {
+  playSelect();
+  if (action === 'portfolio') goToPortfolioFromMenu();
+  else if (action === 'about') showScreen('about');
+}
+
+function prefetchPortfolio() {
+  const frame = document.getElementById('portfolio-frame');
+  const loading = document.getElementById('portfolioLoading');
+  const fallback = document.getElementById('portfolioFallback');
+
+  loading.classList.remove('hidden');
+  fallback.classList.remove('visible');
+
+  if (portfolioLoaded) return;
+
+  frame.src = PORTFOLIO_URL;
+  portfolioLoaded = true;
+
+  frame.onload = () => loading.classList.add('hidden');
+  frame.onerror = () => {
+    loading.classList.add('hidden');
+    fallback.classList.add('visible');
+  };
+
+  setTimeout(() => {
+    if (!loading.classList.contains('hidden')) {
+      loading.classList.add('hidden');
+    }
+  }, 8000);
+}
+
+function startPs1DotsAnimation() {
+  const textEl = document.getElementById('ps1LoadText');
+  const dotsEl = document.getElementById('ps1LoadDots');
+  if (!textEl || !dotsEl) return;
+
+  clearTimeout(ps1LoadTimer);
+  clearInterval(ps1DotsInterval);
+
+  let phaseIndex = 0;
+  let dotCount = 0;
+  let cyclesDone = 0;
+
+  function startPhase() {
+    textEl.textContent = PS1_LOAD_PHASES[phaseIndex];
+    dotsEl.textContent = '';
+    dotCount = 0;
+    cyclesDone = 0;
+  }
+
+  function tick() {
+    dotCount = (dotCount + 1) % 4;
+    dotsEl.textContent = '.'.repeat(dotCount);
+
+    if (dotCount === 3) {
+      cyclesDone += 1;
+      if (cyclesDone >= PS1_LOAD_CYCLES) {
+        clearInterval(ps1DotsInterval);
+
+        if (phaseIndex < PS1_LOAD_PHASES.length - 1) {
+          phaseIndex += 1;
+          ps1LoadTimer = setTimeout(() => {
+            startPhase();
+            ps1DotsInterval = setInterval(tick, PS1_DOT_STEP_MS);
+          }, PS1_DOT_STEP_MS);
+        } else {
+          ps1LoadTimer = setTimeout(finishPs1Load, PS1_DOT_STEP_MS);
+        }
+      }
+    }
+  }
+
+  startPhase();
+  ps1DotsInterval = setInterval(tick, PS1_DOT_STEP_MS);
+}
+
+function goToPortfolioFromMenu() {
+  if (ps1Loading) return;
+  ps1Loading = true;
+  showScreen('ps1load');
+  prefetchPortfolio();
+  startPs1DotsAnimation();
+}
+
+function finishPs1Load() {
+  clearInterval(ps1DotsInterval);
+  clearTimeout(ps1LoadTimer);
+  ps1Loading = false;
+  showScreen('portfolio');
+}
+
+/* ─── PORTFOLIO IFRAME ────────────────────── */
+function loadPortfolio() {
+  const loading = document.getElementById('portfolioLoading');
+  const fallback = document.getElementById('portfolioFallback');
+
+  if (!portfolioLoaded) {
+    prefetchPortfolio();
+    return;
+  }
+
+  fallback.classList.remove('visible');
+  loading.classList.add('hidden');
+}
+
+/* ─── MENU INPUT ──────────────────────────── */
+const menuOpts = () => [...document.querySelectorAll('#menuNav .menu-opt')];
+
+function updateMenuSelection(idx) {
+  const opts = menuOpts();
+  menuIndex = ((idx % opts.length) + opts.length) % opts.length;
+  opts.forEach((o, i) => o.classList.toggle('selected', i === menuIndex));
+}
+
+document.getElementById('menuNav').addEventListener('click', (e) => {
+  const btn = e.target.closest('.menu-opt');
+  if (!btn) return;
+  initAudio();
+  menuIndex = menuOpts().indexOf(btn);
+  updateMenuSelection(menuIndex);
+  openMenuOption(btn.dataset.action);
+});
+
+document.querySelectorAll('[data-action]').forEach(el => {
+  if (el.closest('#menuNav')) return;
+  el.addEventListener('click', () => {
+    initAudio();
+    if (el.dataset.action === 'menu') {
+      playMove();
+      showScreen('menu');
+    }
+  });
+});
+
+/* ─── KEYBOARD ────────────────────────────── */
+document.addEventListener('keydown', (e) => {
+  if (currentScreen === 'poweron') {
+    e.preventDefault();
+    handlePowerOnInput();
+    return;
+  }
+
+  if (currentScreen === 'boot') {
+    e.preventDefault();
+    skipBoot();
+    return;
+  }
+
+  if (currentScreen === 'title') {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      goToMenuFromTitle();
+    }
+    return;
+  }
+
+  if (currentScreen === 'menu') {
+    initAudio();
+    const opt = menuOpts()[menuIndex];
+    if (e.key === 'Enter') {
+      openMenuOption(opt.dataset.action);
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      setMenuOptHot(opt, true);
+      setTimeout(() => setMenuOptHot(opt, false), 450);
+    }
+    return;
+  }
+
+  if (currentScreen === 'portfolio' || currentScreen === 'about') {
+    if (e.key === 'Escape') {
+      playMove();
+      showScreen('menu');
+    }
+  }
+});
+
+document.getElementById('title').addEventListener('click', () => {
+  initAudio();
+  goToMenuFromTitle();
+});
+
+/* ─── AUTO RATIO desde intro.mp4 ─────────── */
+function applyVideoRatio(video) {
+  const w = video.videoWidth;
+  const h = video.videoHeight;
+  if (w && h) {
+    document.documentElement.style.setProperty('--ratio-w', w);
+    document.documentElement.style.setProperty('--ratio-h', h);
+  }
+}
+
+titleVideo.addEventListener('loadedmetadata', () => applyVideoRatio(titleVideo));
+menuVideo.addEventListener('loadedmetadata', () => {
+  if (!titleVideo.videoWidth) applyVideoRatio(menuVideo);
+});
+</script>
+
+</body>
+</html>
