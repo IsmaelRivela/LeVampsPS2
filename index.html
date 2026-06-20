@@ -400,47 +400,12 @@
     /* ─── 4. PORTFOLIO (IFRAME) ──────────────── */
     #portfolio {
       background: #030308;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .portfolio-bar {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-      background: rgba(0,0,8,0.92);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      z-index: 10;
-    }
-
-    .portfolio-back {
-      color: #555;
-      font-size: 10px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: color 0.25s;
-      background: none;
-      border: none;
-      font-family: 'Rajdhani', sans-serif;
-    }
-    .portfolio-back:hover { color: #aac0ff; }
-
-    .portfolio-label {
-      font-family: 'Orbitron', monospace;
-      font-size: 9px;
-      letter-spacing: 6px;
-      color: #333;
-      text-transform: uppercase;
     }
 
     .portfolio-frame-wrap {
-      flex: 1;
-      position: relative;
+      position: absolute;
+      inset: 0;
       overflow: hidden;
-      min-height: 0;
     }
 
     #portfolio-frame {
@@ -733,10 +698,6 @@
 
   <!-- PORTFOLIO EMBED -->
   <div id="portfolio" class="screen">
-    <header class="portfolio-bar">
-      <button class="portfolio-back" data-action="menu">◀ Main Menu</button>
-      <span class="portfolio-label">Portfolio Terminal</span>
-    </header>
     <div class="portfolio-frame-wrap">
       <div class="portfolio-loading" id="portfolioLoading">
         <div class="loading-text">Loading signal</div>
