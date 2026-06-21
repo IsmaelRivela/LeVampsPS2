@@ -44,13 +44,13 @@
       flex-shrink: 0;
     }
 
-    /* Vídeo de fondo — cubre el viewport manteniendo ratio */
+    /* Vídeo de fondo — ratio horizontal completo (textos visibles) */
     .screen-video {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       object-position: center;
       pointer-events: none;
     }
@@ -160,7 +160,7 @@
     .poweron-boot-bg video {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       object-position: center;
     }
 
@@ -195,7 +195,7 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       object-position: center;
       background: #000;
     }
@@ -631,9 +631,8 @@
       }
 
       .experience-viewport {
-        width: 100vw;
-        height: 100dvh;
-        height: -webkit-fill-available;
+        width: min(100vw, calc(100dvh * var(--ratio-w) / var(--ratio-h)));
+        height: min(100dvh, calc(100vw * var(--ratio-h) / var(--ratio-w)));
       }
 
       html.is-mobile-portfolio .experience-viewport {
