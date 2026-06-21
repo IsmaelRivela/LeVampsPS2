@@ -966,7 +966,7 @@ const bootScreen = document.getElementById('boot');
 const titleVideo = document.getElementById('title-video');
 const titleMusic = document.getElementById('title-music');
 const titleStartSound = document.getElementById('title-start-sound');
-const START_SOUND_GAIN = 2.6;
+const START_SOUND_GAIN = 5;
 let titleStartSoundBoosted = false;
 const menuVideo = document.getElementById('menu-video');
 
@@ -1612,7 +1612,8 @@ bootScreen.addEventListener('click', () => {
 });
 
 function openMenuOption(action) {
-  playSelect();
+  if (action === 'portfolio') playStartSound();
+  else playSelect();
   if (action === 'portfolio') goToPortfolioFromMenu();
   else if (action === 'about') showScreen('about');
 }
