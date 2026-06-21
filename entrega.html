@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
   <title>LeVamps Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -17,79 +18,21 @@
     html, body {
       width: 100%;
       height: 100%;
-      background: #0a0a0a;
+      background: #000;
       overflow: hidden;
       font-family: 'Rajdhani', sans-serif;
-    }
-
-    .desktop {
-      width: 100%;
-      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: clamp(0px, 2vh, 24px);
     }
 
-    .app-window {
+    .experience-viewport {
+      position: relative;
       width: min(100vw, calc(100vh * var(--ratio-w) / var(--ratio-h)));
       height: min(100vh, calc(100vw * var(--ratio-h) / var(--ratio-w)));
-      max-width: 1280px;
-      display: flex;
-      flex-direction: column;
-      background: #000;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.75);
       overflow: hidden;
-      position: relative;
-    }
-
-    .app-titlebar {
-      flex-shrink: 0;
-      height: 34px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px 0 14px;
-      background: linear-gradient(180deg, #1a1a1f 0%, #101014 100%);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      user-select: none;
-    }
-
-    .app-traffic {
-      display: flex;
-      gap: 7px;
-    }
-
-    .app-traffic i {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      display: block;
-      background: #3a3a42;
-    }
-
-    .app-traffic i:nth-child(1) { background: #ff5f57; }
-    .app-traffic i:nth-child(2) { background: #febc2e; }
-    .app-traffic i:nth-child(3) { background: #28c840; }
-
-    .app-title {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: 'Orbitron', monospace;
-      font-size: 10px;
-      letter-spacing: 4px;
-      color: rgba(255, 255, 255, 0.45);
-      text-transform: uppercase;
-      pointer-events: none;
-    }
-
-    .app-stage {
-      flex: 1;
-      position: relative;
-      min-height: 0;
       background: #000;
+      flex-shrink: 0;
     }
 
     .boot-screen {
@@ -204,47 +147,53 @@
       inset: 0;
       background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
     }
+
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+      html { height: -webkit-fill-available; }
+      body {
+        height: 100dvh;
+        height: -webkit-fill-available;
+        touch-action: manipulation;
+      }
+      .experience-viewport {
+        width: 100vw;
+        height: 100dvh;
+        height: -webkit-fill-available;
+      }
+      .boot-label {
+        font-size: 14px;
+        right: 4%;
+        bottom: 5%;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="desktop">
-    <div class="app-window" role="application" aria-label="LeVamps Portfolio">
-      <header class="app-titlebar">
-        <div class="app-traffic" aria-hidden="true">
-          <i></i><i></i><i></i>
-        </div>
-        <span class="app-title">LeVamps Portfolio</span>
-      </header>
-
-      <div class="app-stage">
-        <div class="boot-screen" id="bootScreen">
-          <p class="boot-label">
-            loading <span id="bootText">portfolio</span><span id="bootDots" class="boot-dots"></span>
-          </p>
-        </div>
-
-        <iframe
-          id="appFrame"
-          class="app-frame"
-          title="LeVamps Portfolio"
-          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
-        ></iframe>
-
-        <div class="boot-fallback" id="bootFallback">
-          <p>No se pudo cargar dentro de la app. Abre la experiencia completa en el navegador.</p>
-          <a id="openExternal" href="#" target="_blank" rel="noopener">Abrir portfolio</a>
-          <button type="button" id="retryLoad">Reintentar</button>
-        </div>
-
-        <div class="crt-global" aria-hidden="true"></div>
-      </div>
+  <div class="experience-viewport" role="application" aria-label="LeVamps Portfolio">
+    <div class="boot-screen" id="bootScreen">
+      <p class="boot-label">
+        loading <span id="bootText">portfolio</span><span id="bootDots" class="boot-dots"></span>
+      </p>
     </div>
+
+    <iframe
+      id="appFrame"
+      class="app-frame"
+      title="LeVamps Portfolio"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
+    ></iframe>
+
+    <div class="boot-fallback" id="bootFallback">
+      <p>No se pudo cargar dentro de la app. Abre la experiencia completa en el navegador.</p>
+      <a id="openExternal" href="#" target="_blank" rel="noopener">Abrir portfolio</a>
+      <button type="button" id="retryLoad">Reintentar</button>
+    </div>
+
+    <div class="crt-global" aria-hidden="true"></div>
   </div>
 
   <script>
-    // GitHub Pages — IsmaelRivela/LeVampsPS2
     const PAGES_URL = 'https://ismaelrivela.github.io/LeVampsPS2/';
-
     const BOOT_PHASES = ['portfolio', 'levamps'];
     const BOOT_CYCLES = 2;
     const DOT_STEP_MS = 320;

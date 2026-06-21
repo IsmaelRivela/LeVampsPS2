@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <title>Ismael Rivela — Portfolio</title>
@@ -610,6 +612,151 @@
       transition: color 0.2s;
     }
     .about-contact a:hover { color: #aac0ff; }
+
+    .poweron-tap-hint {
+      display: none;
+    }
+
+    /* ─── MOBILE / TOUCH ─────────────────────── */
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+      html {
+        height: -webkit-fill-available;
+      }
+
+      body {
+        height: 100dvh;
+        height: -webkit-fill-available;
+        touch-action: manipulation;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      .experience-viewport {
+        width: 100vw;
+        height: 100dvh;
+        height: -webkit-fill-available;
+      }
+
+      html.is-mobile-portfolio .experience-viewport {
+        width: 100vw;
+        height: 100dvh;
+        height: -webkit-fill-available;
+      }
+
+      #poweron {
+        cursor: default;
+        touch-action: none;
+      }
+
+      #poweron-video {
+        width: 20vw;
+        min-width: 84px;
+        max-width: 120px;
+      }
+
+      .poweron-tap-hint {
+        display: block;
+        position: absolute;
+        left: 50%;
+        bottom: 16%;
+        transform: translateX(-50%);
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: rgba(255, 255, 255, 0.72);
+        text-align: center;
+        z-index: 2;
+        pointer-events: none;
+        white-space: nowrap;
+        text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+      }
+
+      .poweron-tap-hint.hidden {
+        display: none;
+      }
+
+      .poweron-trail-ghost {
+        font-size: 12px;
+      }
+
+      .title-prompt {
+        font-size: 11px;
+        letter-spacing: 3px;
+        bottom: 10%;
+        white-space: normal;
+        text-align: center;
+        width: 88%;
+      }
+
+      .menu-options {
+        bottom: 7%;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .opt-canvas {
+        width: min(72vw, 300px);
+      }
+
+      .skip-hint {
+        font-size: 9px;
+        letter-spacing: 2px;
+        padding: 14px 18px;
+        bottom: 2%;
+        right: 2%;
+      }
+
+      .ps1-load-label {
+        font-size: 14px;
+        right: 4%;
+        bottom: 5%;
+      }
+
+      .portfolio-frame-wrap {
+        overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #portfolio-frame {
+        width: 100%;
+        height: 100%;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .portfolio-open-external {
+        display: flex;
+      }
+    }
+
+    .portfolio-open-external {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 8;
+      justify-content: center;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      background: linear-gradient(transparent, rgba(0, 0, 8, 0.92));
+      pointer-events: none;
+    }
+
+    .portfolio-open-external a {
+      pointer-events: auto;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .portfolio-open-external a:active {
+      color: #aac0ff;
+    }
   </style>
 </head>
 <body>
@@ -629,6 +776,7 @@
       ></video>
     </div>
     <div class="poweron-trail" id="poweronTrail" aria-hidden="true"></div>
+    <p class="poweron-tap-hint" id="poweronTapHint">tap to turn on</p>
     <video
       id="poweron-video"
       src="assets/ps2-turn-on-effectapp.mp4?v=7"
@@ -712,6 +860,9 @@
         title="Portfolio — levamps.com"
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
       ></iframe>
+      <div class="portfolio-open-external">
+        <a id="portfolioOpenExternal" href="https://levamps.com" target="_blank" rel="noopener">Open full site ↗</a>
+      </div>
     </div>
   </div>
 
@@ -784,6 +935,7 @@ const poweronVideo = document.getElementById('poweron-video');
 const poweronBootBg = document.getElementById('poweronBootBg');
 const poweronBootVideo = document.getElementById('poweron-boot-video');
 const poweronTrail = document.getElementById('poweronTrail');
+const poweronTapHint = document.getElementById('poweronTapHint');
 const bootVideo = document.getElementById('boot-video');
 const bootScreen = document.getElementById('boot');
 const titleVideo = document.getElementById('title-video');
@@ -1060,6 +1212,8 @@ function showScreen(id, instant = false) {
   target.classList.add('active');
   currentScreen = id;
 
+  document.documentElement.classList.toggle('is-mobile-portfolio', isMobile() && id === 'portfolio');
+
   manageVideos(id);
 
   if (id === 'portfolio') loadPortfolio();
@@ -1139,11 +1293,25 @@ function spawnPoweronTrail(x, y) {
 function movePoweronCursor(e) {
   if (poweronHandoffDone) return;
   const rect = poweronScreen.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const pt = e.touches ? e.touches[0] : e;
+  const x = pt.clientX - rect.left;
+  const y = pt.clientY - rect.top;
   poweronVideo.style.left = `${x}px`;
   poweronVideo.style.top = `${y}px`;
   spawnPoweronTrail(x, y);
+}
+
+function isMobile() {
+  return window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)').matches;
+}
+
+function applyMobileUI() {
+  if (!isMobile()) return;
+  document.documentElement.classList.add('is-mobile');
+  const titlePrompt = document.querySelector('.title-prompt');
+  if (titlePrompt) titlePrompt.textContent = 'Tap to continue';
+  const skipHint = document.getElementById('skipHint');
+  if (skipHint) skipHint.textContent = 'Skip — tap here';
 }
 
 function setCrossfade(p) {
@@ -1192,6 +1360,7 @@ async function startPowerOn() {
   if (poweronStarted) return;
   poweronStarted = true;
   clearPoweronTrail();
+  if (poweronTapHint) poweronTapHint.classList.add('hidden');
   audioUnlocked = true;
   await unlockAudio();
 
@@ -1241,12 +1410,29 @@ function finishPowerOn() {
   handoffToBootScreen();
 }
 
-function handlePowerOnInput() {
+function handlePowerOnInput(e) {
+  if (e?.type === 'touchstart') e.preventDefault();
   if (!poweronStarted) startPowerOn();
 }
 
+let poweronIgnoreClick = false;
+
 poweronScreen.addEventListener('mousemove', movePoweronCursor);
-poweronScreen.addEventListener('click', handlePowerOnInput);
+poweronScreen.addEventListener('touchmove', (e) => {
+  if (poweronHandoffDone) return;
+  e.preventDefault();
+  movePoweronCursor(e);
+}, { passive: false });
+poweronScreen.addEventListener('touchstart', (e) => {
+  poweronIgnoreClick = true;
+  setTimeout(() => { poweronIgnoreClick = false; }, 400);
+  movePoweronCursor(e);
+  handlePowerOnInput(e);
+}, { passive: false });
+poweronScreen.addEventListener('click', (e) => {
+  if (poweronIgnoreClick) return;
+  handlePowerOnInput(e);
+});
 poweronVideo.addEventListener('loadeddata', () => {
   poweronVideo.pause();
   poweronVideo.currentTime = 0;
@@ -1310,6 +1496,12 @@ function skipBoot() {
 bootVideo.addEventListener('ended', finishBoot);
 document.getElementById('skipHint').addEventListener('click', (e) => {
   e.stopPropagation();
+  skipBoot();
+});
+
+bootScreen.addEventListener('touchend', (e) => {
+  if (currentScreen !== 'boot' || !bootStarted) return;
+  if (e.target.closest('#skipHint')) return;
   skipBoot();
 });
 
@@ -1509,6 +1701,9 @@ titleVideo.addEventListener('loadedmetadata', () => applyVideoRatio(titleVideo))
 menuVideo.addEventListener('loadedmetadata', () => {
   if (!titleVideo.videoWidth) applyVideoRatio(menuVideo);
 });
+
+applyMobileUI();
+window.addEventListener('resize', applyMobileUI);
 </script>
 
 </body>

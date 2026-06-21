@@ -1,5 +1,7 @@
 node_modules/
 dist/
+dist-launcher/
+dist-launcher-win/
 .DS_Store
 .venv/
 *.zip
