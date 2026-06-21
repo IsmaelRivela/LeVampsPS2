@@ -966,8 +966,9 @@ const bootScreen = document.getElementById('boot');
 const titleVideo = document.getElementById('title-video');
 const titleMusic = document.getElementById('title-music');
 const titleStartSound = document.getElementById('title-start-sound');
-const START_SOUND_GAIN = 5;
-let titleStartSoundBoosted = false;
+const START_SOUND_GAIN = 2.5;
+let startSoundBuffer = null;
+let startSoundBufferLoading = null;
 const menuVideo = document.getElementById('menu-video');
 
 /* ─── LUMA KEY (quita fondo negro del vídeo) ─ */
@@ -1184,6 +1185,7 @@ function pauseScreenVideo(video) {
 function playTitleMusic() {
   if (!titleMusic) return;
   unlockAudio();
+  prepareStartSound();
   titleMusic.volume = 0.55;
   titleMusic.currentTime = 0;
   titleMusic.play().catch(() => {});
@@ -1204,6 +1206,7 @@ function manageVideos(screen) {
   }
 
   if (screen === 'menu') {
+    prepareStartSound();
     menuVideo.load();
     playScreenVideo(menuVideo);
     initMenuLumaKeys();
@@ -1285,21 +1288,50 @@ function positionMenuToVideo() {
   nav.style.bottom = `${insetY + renderedH * 0.07}px`;
 }
 
-function setupStartSoundBoost() {
-  if (!titleStartSound || titleStartSoundBoosted) return;
+async function loadStartSoundBuffer() {
+  if (startSoundBuffer) return startSoundBuffer;
+  if (startSoundBufferLoading) return startSoundBufferLoading;
+
+  startSoundBufferLoading = (async () => {
+    try {
+      initAudio();
+      const src = titleStartSound?.currentSrc || titleStartSound?.src || 'assets/startsound.mp3';
+      const resp = await fetch(src);
+      const data = await resp.arrayBuffer();
+      startSoundBuffer = await audioCtx.decodeAudioData(data);
+      return startSoundBuffer;
+    } catch (_) {
+      return null;
+    } finally {
+      startSoundBufferLoading = null;
+    }
+  })();
+
+  return startSoundBufferLoading;
+}
+
+function prepareStartSound() {
   initAudio();
-  const source = audioCtx.createMediaElementSource(titleStartSound);
-  const gain = audioCtx.createGain();
-  gain.gain.value = START_SOUND_GAIN;
-  source.connect(gain);
-  gain.connect(audioCtx.destination);
-  titleStartSoundBoosted = true;
+  loadStartSoundBuffer();
 }
 
 function playStartSound() {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  if (startSoundBuffer) {
+    const source = audioCtx.createBufferSource();
+    const gain = audioCtx.createGain();
+    source.buffer = startSoundBuffer;
+    gain.gain.value = START_SOUND_GAIN;
+    source.connect(gain);
+    gain.connect(audioCtx.destination);
+    source.start(0);
+    return;
+  }
+
+  loadStartSoundBuffer();
   if (!titleStartSound) return;
-  unlockAudio();
-  setupStartSoundBoost();
   titleStartSound.volume = 1;
   titleStartSound.currentTime = 0;
   titleStartSound.play().catch(() => {});
@@ -1612,8 +1644,7 @@ bootScreen.addEventListener('click', () => {
 });
 
 function openMenuOption(action) {
-  if (action === 'portfolio') playStartSound();
-  else playSelect();
+  playSelect();
   if (action === 'portfolio') goToPortfolioFromMenu();
   else if (action === 'about') showScreen('about');
 }
