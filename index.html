@@ -644,7 +644,16 @@
 
       #poweron {
         cursor: default;
-        touch-action: none;
+        touch-action: manipulation;
+      }
+
+      html.is-mobile #poweron-video {
+        left: 50% !important;
+        top: 50% !important;
+      }
+
+      html.is-mobile .poweron-trail {
+        display: none;
       }
 
       #poweron-video {
@@ -1250,8 +1259,6 @@ function goToMenuFromTitle() {
 let lastTrailAt = 0;
 let lastCursorX = null;
 let lastCursorY = null;
-let poweronTouchStart = null;
-let poweronPreviewPrimed = false;
 const TRAIL_INTERVAL_MS = 120;
 const TRAIL_LAG_PX = 42;
 const MAX_TRAIL_GHOSTS = 18;
@@ -1263,7 +1270,7 @@ function clearPoweronTrail() {
 }
 
 function spawnPoweronTrail(x, y) {
-  if (poweronStarted || poweronHandoffDone || !poweronTrail) return;
+  if (isMobile() || poweronStarted || poweronHandoffDone || !poweronTrail) return;
 
   const now = performance.now();
   if (now - lastTrailAt < TRAIL_INTERVAL_MS) return;
@@ -1287,7 +1294,7 @@ function spawnPoweronTrail(x, y) {
 
   const ghost = document.createElement('span');
   ghost.className = 'poweron-trail-ghost';
-  ghost.textContent = isMobile() ? 'tap to turn on' : 'click to turn on';
+  ghost.textContent = 'click to turn on';
   ghost.style.left = `${tx}px`;
   ghost.style.top = `${ty}px`;
   poweronTrail.appendChild(ghost);
@@ -1300,7 +1307,7 @@ function spawnPoweronTrail(x, y) {
 }
 
 function movePoweronCursor(e) {
-  if (poweronHandoffDone) return;
+  if (poweronHandoffDone || isMobile()) return;
   const rect = poweronScreen.getBoundingClientRect();
   const pt = e.touches ? e.touches[0] : e;
   const x = pt.clientX - rect.left;
@@ -1322,24 +1329,6 @@ function applyMobileUI() {
   const skipHint = document.getElementById('skipHint');
   if (skipHint) skipHint.textContent = 'Skip — tap here';
   if (poweronTapHint) poweronTapHint.textContent = 'tap to turn on';
-  if (poweronVideo && poweronScreen) {
-    const rect = poweronScreen.getBoundingClientRect();
-    poweronVideo.style.left = `${rect.width / 2}px`;
-    poweronVideo.style.top = `${rect.height / 2}px`;
-  }
-}
-
-async function primePoweronPreview() {
-  if (poweronPreviewPrimed || poweronStarted || !poweronVideo) return;
-  poweronPreviewPrimed = true;
-  poweronVideo.muted = true;
-  try {
-    await poweronVideo.play();
-    poweronVideo.pause();
-    poweronVideo.currentTime = 0.001;
-  } catch (_) {
-    poweronPreviewPrimed = false;
-  }
 }
 
 function setCrossfade(p) {
@@ -1446,36 +1435,12 @@ let poweronIgnoreClick = false;
 
 poweronScreen.addEventListener('mousemove', movePoweronCursor);
 
-poweronScreen.addEventListener('touchstart', (e) => {
-  if (poweronHandoffDone) return;
+poweronScreen.addEventListener('touchstart', () => {
+  if (poweronHandoffDone || !isMobile()) return;
   poweronIgnoreClick = true;
   setTimeout(() => { poweronIgnoreClick = false; }, 400);
-  const t = e.touches[0];
-  poweronTouchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
-  movePoweronCursor(e);
-  primePoweronPreview();
-}, { passive: false });
-
-poweronScreen.addEventListener('touchmove', (e) => {
-  if (poweronHandoffDone) return;
-  e.preventDefault();
-  movePoweronCursor(e);
-}, { passive: false });
-
-poweronScreen.addEventListener('touchend', (e) => {
-  if (poweronHandoffDone || poweronStarted || !poweronTouchStart) return;
-  const t = e.changedTouches[0];
-  const dx = t.clientX - poweronTouchStart.x;
-  const dy = t.clientY - poweronTouchStart.y;
-  const moved = Math.hypot(dx, dy);
-  const elapsed = Date.now() - poweronTouchStart.time;
-  poweronTouchStart = null;
-  if (moved < 18 && elapsed < 600) handlePowerOnInput();
+  handlePowerOnInput();
 }, { passive: true });
-
-poweronScreen.addEventListener('touchcancel', () => {
-  poweronTouchStart = null;
-});
 
 poweronScreen.addEventListener('click', (e) => {
   if (poweronIgnoreClick || isMobile()) return;
