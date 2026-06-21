@@ -1354,46 +1354,51 @@ function runCrossfade() {
   crossfadeRaf = requestAnimationFrame(tick);
 }
 
-async function beginBootCrossfade() {
+function beginBootCrossfade() {
   if (bootCrossfadeStarted) return;
   bootCrossfadeStarted = true;
 
-  poweronBootVideo.muted = false;
+  poweronBootVideo.muted = true;
   poweronBootVideo.volume = 1;
   poweronBootVideo.currentTime = 0;
-
-  try {
-    await poweronBootVideo.play();
-  } catch (_) {
-    poweronBootVideo.muted = true;
-    await poweronBootVideo.play();
-  }
+  poweronBootVideo.play().catch(() => {});
 
   runCrossfade();
 }
 
-async function startPowerOn() {
+function startPowerOn() {
   if (poweronStarted) return;
   poweronStarted = true;
   clearPoweronTrail();
   if (poweronTapHint) poweronTapHint.classList.add('hidden');
-  audioUnlocked = true;
-  await unlockAudio();
 
   poweronScreen.classList.add('is-playing');
+  audioUnlocked = true;
+  unlockAudio();
 
-  poweronVideo.muted = false;
+  poweronVideo.muted = isMobile();
   poweronVideo.volume = 1;
   poweronVideo.currentTime = 0;
 
-  try {
-    await poweronVideo.play();
-  } catch (_) {
-    poweronVideo.muted = true;
-    await poweronVideo.play();
+  if (!isMobile()) poweronVideo.muted = false;
+
+  const playAttempt = poweronVideo.play();
+  if (playAttempt?.catch) {
+    playAttempt.catch(() => {
+      poweronVideo.muted = true;
+      return poweronVideo.play();
+    });
   }
 
   setTimeout(() => beginBootCrossfade(), 350);
+
+  setTimeout(() => {
+    if (poweronHandoffDone || !poweronStarted) return;
+    if (poweronVideo.paused || poweronVideo.ended) {
+      if (!bootCrossfadeStarted) beginBootCrossfade();
+      setTimeout(finishPowerOn, 600);
+    }
+  }, 3000);
 }
 
 function handoffToBootScreen() {
@@ -1402,12 +1407,15 @@ function handoffToBootScreen() {
 
   const t = poweronBootVideo.currentTime || 0;
 
-  bootVideo.muted = poweronBootVideo.muted;
+  bootVideo.muted = true;
   bootVideo.volume = poweronBootVideo.volume;
   bootVideo.currentTime = t;
 
   showScreen('boot', true);
-  bootVideo.play().catch(() => {});
+  bootVideo.play().catch(() => {
+    bootVideo.muted = true;
+    bootVideo.play().catch(() => {});
+  });
   bootStarted = true;
   bootScreen.classList.add('is-playing');
 
@@ -1434,12 +1442,12 @@ let poweronIgnoreClick = false;
 
 poweronScreen.addEventListener('mousemove', movePoweronCursor);
 
-poweronScreen.addEventListener('touchstart', () => {
+poweronScreen.addEventListener('touchstart', (e) => {
   if (poweronHandoffDone || !isMobile()) return;
   poweronIgnoreClick = true;
   setTimeout(() => { poweronIgnoreClick = false; }, 400);
   handlePowerOnInput();
-}, { passive: true });
+}, { passive: false });
 
 poweronScreen.addEventListener('click', (e) => {
   if (poweronIgnoreClick || isMobile()) return;
