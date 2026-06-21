@@ -1391,14 +1391,41 @@ function runCrossfade() {
   crossfadeRaf = requestAnimationFrame(tick);
 }
 
+function primeVideoAudio(video) {
+  if (!video) return;
+  const savedTime = video.currentTime || 0;
+  video.muted = false;
+  video.volume = 1;
+  const attempt = video.play();
+  if (!attempt?.then) return;
+  attempt.then(() => {
+    video.pause();
+    video.currentTime = savedTime;
+  }).catch(() => {
+    video.muted = true;
+  });
+}
+
+function playVideoWithSound(video, fromTime = null) {
+  if (!video) return Promise.resolve();
+  if (fromTime != null) video.currentTime = fromTime;
+  video.volume = 1;
+  if (!audioUnlocked) {
+    video.muted = true;
+    return video.play().catch(() => {});
+  }
+  video.muted = false;
+  return video.play().catch(() => {
+    video.muted = true;
+    return video.play();
+  });
+}
+
 function beginBootCrossfade() {
   if (bootCrossfadeStarted) return;
   bootCrossfadeStarted = true;
 
-  poweronBootVideo.muted = true;
-  poweronBootVideo.volume = 1;
-  poweronBootVideo.currentTime = 0;
-  poweronBootVideo.play().catch(() => {});
+  playVideoWithSound(poweronBootVideo, 0);
 
   runCrossfade();
 }
@@ -1427,6 +1454,10 @@ function startPowerOn() {
     });
   }
 
+  // Desbloquea audio del intro PS2 en el mismo gesto del usuario
+  primeVideoAudio(poweronBootVideo);
+  primeVideoAudio(bootVideo);
+
   setTimeout(() => beginBootCrossfade(), 350);
 
   setTimeout(() => {
@@ -1444,17 +1475,11 @@ function handoffToBootScreen() {
 
   const t = poweronBootVideo.currentTime || 0;
 
-  bootVideo.muted = true;
-  bootVideo.volume = poweronBootVideo.volume;
-  bootVideo.currentTime = t;
-
   showScreen('boot', true);
-  bootVideo.play().catch(() => {
-    bootVideo.muted = true;
-    bootVideo.play().catch(() => {});
-  });
   bootStarted = true;
   bootScreen.classList.add('is-playing');
+
+  playVideoWithSound(bootVideo, t);
 
   poweronVideo.pause();
   poweronBootVideo.pause();
