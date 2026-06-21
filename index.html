@@ -703,13 +703,18 @@
       }
 
       .menu-options {
-        bottom: 7%;
-        left: 50%;
-        transform: translateX(-50%);
+        bottom: 10%;
+        left: auto;
+        right: 4%;
+        transform: none;
+      }
+
+      .menu-opt .opt-media-wrap {
+        transform-origin: right bottom;
       }
 
       .opt-canvas {
-        width: min(72vw, 300px);
+        width: min(36vw, 148px);
       }
 
       .skip-hint {
@@ -1239,6 +1244,38 @@ function showScreen(id, instant = false) {
   if (id !== 'boot' && bootVideo && !bootVideo.paused) {
     bootVideo.pause();
   }
+
+  if (id === 'menu') requestAnimationFrame(positionMenuToVideo);
+}
+
+function positionMenuToVideo() {
+  const nav = document.getElementById('menuNav');
+  const screen = document.getElementById('menu');
+  if (!nav || !screen || !menuVideo || !isMobile()) {
+    if (nav) {
+      nav.style.right = '';
+      nav.style.bottom = '';
+      nav.style.left = '';
+      nav.style.transform = '';
+    }
+    return;
+  }
+
+  const screenRect = screen.getBoundingClientRect();
+  const vw = menuVideo.videoWidth;
+  const vh = menuVideo.videoHeight;
+  if (!vw || !vh || !screenRect.width || !screenRect.height) return;
+
+  const scale = Math.min(screenRect.width / vw, screenRect.height / vh);
+  const renderedW = vw * scale;
+  const renderedH = vh * scale;
+  const insetX = (screenRect.width - renderedW) / 2;
+  const insetY = (screenRect.height - renderedH) / 2;
+
+  nav.style.left = 'auto';
+  nav.style.transform = 'none';
+  nav.style.right = `${insetX + renderedW * 0.04}px`;
+  nav.style.bottom = `${insetY + renderedH * 0.07}px`;
 }
 
 function playStartSound() {
@@ -1721,10 +1758,14 @@ function applyVideoRatio(video) {
 titleVideo.addEventListener('loadedmetadata', () => applyVideoRatio(titleVideo));
 menuVideo.addEventListener('loadedmetadata', () => {
   if (!titleVideo.videoWidth) applyVideoRatio(menuVideo);
+  positionMenuToVideo();
 });
 
 applyMobileUI();
-window.addEventListener('resize', applyMobileUI);
+window.addEventListener('resize', () => {
+  applyMobileUI();
+  positionMenuToVideo();
+});
 </script>
 
 </body>
