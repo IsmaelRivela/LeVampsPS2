@@ -631,14 +631,19 @@
       }
 
       .experience-viewport {
-        width: min(100vw, calc(100dvh * var(--ratio-w) / var(--ratio-h)));
-        height: min(100dvh, calc(100vw * var(--ratio-h) / var(--ratio-w)));
+        width: 100vw;
+        height: 100dvh;
+        height: -webkit-fill-available;
       }
 
       html.is-mobile-portfolio .experience-viewport {
         width: 100vw;
         height: 100dvh;
         height: -webkit-fill-available;
+      }
+
+      html.is-mobile .screen {
+        cursor: pointer;
       }
 
       #poweron {
@@ -1583,8 +1588,12 @@ document.getElementById('skipHint').addEventListener('click', (e) => {
 });
 
 bootScreen.addEventListener('touchend', (e) => {
-  if (currentScreen !== 'boot' || !bootStarted) return;
-  if (e.target.closest('#skipHint')) return;
+  if (currentScreen !== 'boot' || !bootStarted || bootFinished) return;
+  skipBoot();
+});
+
+bootScreen.addEventListener('click', () => {
+  if (currentScreen !== 'boot' || !bootStarted || bootFinished) return;
   skipBoot();
 });
 
@@ -1711,6 +1720,19 @@ document.getElementById('menuNav').addEventListener('click', (e) => {
   updateMenuSelection(menuIndex);
   openMenuOption(btn.dataset.action);
 });
+
+document.getElementById('menu').addEventListener('touchstart', (e) => {
+  if (!isMobile() || currentScreen !== 'menu') return;
+  if (e.target.closest('.menu-opt')) return;
+  initAudio();
+  openMenuOption('portfolio');
+}, { passive: true });
+
+document.getElementById('title').addEventListener('touchstart', () => {
+  if (!isMobile() || currentScreen !== 'title') return;
+  initAudio();
+  goToMenuFromTitle();
+}, { passive: true });
 
 document.querySelectorAll('[data-action]').forEach(el => {
   if (el.closest('#menuNav')) return;
