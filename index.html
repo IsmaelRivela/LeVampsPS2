@@ -704,13 +704,13 @@
 
       .menu-options {
         bottom: 10%;
-        left: auto;
-        right: 4%;
+        left: 4%;
+        right: auto;
         transform: none;
       }
 
       .menu-opt .opt-media-wrap {
-        transform-origin: right bottom;
+        transform-origin: left bottom;
       }
 
       .opt-canvas {
@@ -1272,9 +1272,9 @@ function positionMenuToVideo() {
   const insetX = (screenRect.width - renderedW) / 2;
   const insetY = (screenRect.height - renderedH) / 2;
 
-  nav.style.left = 'auto';
+  nav.style.right = 'auto';
   nav.style.transform = 'none';
-  nav.style.right = `${insetX + renderedW * 0.04}px`;
+  nav.style.left = `${insetX + renderedW * 0.04}px`;
   nav.style.bottom = `${insetY + renderedH * 0.07}px`;
 }
 
