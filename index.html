@@ -966,6 +966,8 @@ const bootScreen = document.getElementById('boot');
 const titleVideo = document.getElementById('title-video');
 const titleMusic = document.getElementById('title-music');
 const titleStartSound = document.getElementById('title-start-sound');
+const START_SOUND_GAIN = 2.6;
+let titleStartSoundBoosted = false;
 const menuVideo = document.getElementById('menu-video');
 
 /* ─── LUMA KEY (quita fondo negro del vídeo) ─ */
@@ -1283,9 +1285,21 @@ function positionMenuToVideo() {
   nav.style.bottom = `${insetY + renderedH * 0.07}px`;
 }
 
+function setupStartSoundBoost() {
+  if (!titleStartSound || titleStartSoundBoosted) return;
+  initAudio();
+  const source = audioCtx.createMediaElementSource(titleStartSound);
+  const gain = audioCtx.createGain();
+  gain.gain.value = START_SOUND_GAIN;
+  source.connect(gain);
+  gain.connect(audioCtx.destination);
+  titleStartSoundBoosted = true;
+}
+
 function playStartSound() {
   if (!titleStartSound) return;
   unlockAudio();
+  setupStartSoundBoost();
   titleStartSound.volume = 1;
   titleStartSound.currentTime = 0;
   titleStartSound.play().catch(() => {});
